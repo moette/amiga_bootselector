@@ -5,25 +5,24 @@
 // 
 // https://github.com/moette/amiga_bootselector
 //
-
+// Write this WITHOUT Arduino bootloader (using ISP!)
+//
+//  
+//  This program is free software: you can redistribute it and/or modify
+//  it under the terms of the GNU General Public License as published by
+//  the Free Software Foundation, either version 3 of the License, or
+//  (at your option) any later version.
+//  
+//  This program is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  GNU General Public License for more details.
+//  
+//  You should have received a copy of the GNU General Public License
+//  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+//
 /*
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
-/*
-   PORTB Wiring
-
+PORTB Wiring
       ,------->/SEL0 (out)
       | ,----->/SEL2 (out)
       | | ,--->LED1  (out)
@@ -31,11 +30,8 @@
        | | '-->LED2  (out)
        | '---->/SEL3 (out)
        '------>/SEL1 (out)
-*/
 
-/*
-   PIND Wiring
-
+PORTD Wiring
       ,-------</SEL0 (in)
       | ,-----</SEL2 (in)
       | | ,---
@@ -44,7 +40,14 @@
        | '----</SEL3 (in)
        '------</SEL1 (in)
 
-
+PORTC Wiring
+      ,-------
+      | ,-----
+      | | ,---
+   B00111111
+       | | '--
+       | '----
+       '------</RESET (in, A5)
 */
 
 #include <EEPROM.h>
@@ -62,32 +65,30 @@
 #define LED1MASK B00000010
 #define LED2MASK B00000001
 
-#define CIA_RESET A5          // LOW Active
+#define CIA_RESET_MASK B00100000       // LOW Active
 
-#define WOMLOADDELAY 500
+#define WOMLOADDELAY 500      // Time the /SEL0 line has to be active to distinguish the A1000 WOM loader from Kickstart
 
 #define EPROM_ADDR_SETUPFLAG  1
 #define EPROM_ADDR_ACTIVEFLAG 2
 
-bool b_led1On = false;        // led 1 is turned on?
-bool b_led2On = false;        // led 2 is turned on?
 bool b_enabled = true;        // true if the swapping of SEL lines is enabled
-bool b_waitForReady = true;   // true when the main loop is waiting for the drives to be querried
+bool b_waitForReady = true;   // true when the main loop is waiting for the drives to be scanned
 
-short SRC1 = SEL0POS, DST1 = SEL1POS;
+unsigned volatile short SRC1 = SEL0POS, DST1 = SEL1POS;
 
 /**
- * Will flash the LED times.
- * Blocks execution 180ms x times!!
+ * Will flash the LED identified by 'mask'.
+ * Blocks execution!!
  */
 inline void flashLED(short mask, short times, int dly = 80 )
 {
   while( times --> 0 )
   {
       // Blink the LEDs
-      PORTB = mask;
+      PORTB |= mask;
       delay(dly);
-      PORTB = 0;
+      PORTB &= ~mask;
       delay(dly);
   }
 }
@@ -103,26 +104,27 @@ inline unsigned short swapBits(unsigned short n, unsigned short p1, unsigned sho
 /**
  * Called periodically to forward digital readings from /SEL0-3 to the output pins.
  */
-short old = 0;
+unsigned volatile short org = 0;
 inline void forward(bool swapped)
 {
   unsigned short rd = (PINMASK & PIND);
-  
-  if( swapped )
-    PORTB = (b_led1On ? LED1MASK : 0) | (b_led2On ? LED2MASK : 0) | (swapBits(rd, DST1, SRC1)); // DF0, DF1
-  else
-    PORTB = (b_led1On ? LED1MASK : 0) | (b_led2On ? LED2MASK : 0) | rd;
-
-  // Animate LEDs
-  /* if( old != rd )
+  if( org != rd )
   {
-    old = rd;
-    b_led1On = b_led1On ? false : true;
-  }*/
+    if( swapped )
+      PORTB =(swapBits(rd, DST1, SRC1)); 
+    else
+      PORTB = rd;
+
+    org = rd;
+  }
 }
 
 /**
- * Waits until the /SEL3 line was triggered or /SEL0 was active for at least 500ms (A1K).
+ * Waits until 
+ *  - /SEL3 was triggered or 
+ *  - /SEL0 was active for at least WOMLOADDELAY (ms) to detect the A1K WOM loader
+ *  
+ *  SEL0-3 are forwarded unchanged in this function.
  */
 inline void waitForReady()
 {
@@ -132,21 +134,19 @@ inline void waitForReady()
   // Wait for the drives to be scanned by kickstart or for the A1k WOM loader...
   while (true)
   {
-    // Pass through the org. values...
+    // Pass through the org. signals
     forward(false);
 
     // If SEL3 goes low the last drive is scanned and we can switch
     if ( ( PIND & SEL3MASK ) != SEL3MASK )
     {
-      delay(10);
+      //delay(10);
       break;
     }
     // TODO: Add Amiga 1000 WOM Loader detection code
     /* else if( ( PIND & SEL0MASK ) == SEL0MASK && (micros() - wtime) > WOMLOADDELAY)
     {
       // If SEL0 is LOW for a longer period, the A1k WOM LOADER is active
-      b_led2On = true;
-      b_led1On = false;
       break;
     }*/
   }
@@ -155,13 +155,13 @@ inline void waitForReady()
 /**
  * Init the atmega. 
  * Set the output pins. 
- * Read the setup from the EEPROM.
+ * Read the setup from the EEPROM or initialize it if necessary.
  */
 void setup()
 {
   // Enable outputs
   DDRB = DDRB | B00111111;
-
+ 
   // Read EPROM
   if( ( EEPROM.read(EPROM_ADDR_SETUPFLAG) == 255 ) )
   {
@@ -183,63 +183,66 @@ void setup()
 
     //TODO READ+WRITE DEST-SRC1+2
   }
-
-  // Turn LEDs on to signal we are alive
-  // PORTB = (LED1MASK | (b_enabled ? LED2MASK:0));
   
-
-  // Wait for RESET line to go HIGH
-  while( digitalRead(CIA_RESET) == LOW )
-  {
-    
-  }
 }
 
 /**
- * Main loop. 
- * Handles RESET line.
- * Handles drive initialization.
- * Handles SEL0-3 forwarding.
+ * Reset Handler called by loop()
+ */
+void HandleReset()
+{
+  PORTB |= LED1MASK;
+  
+  unsigned long rstart = millis();
+  while( ( PINC & CIA_RESET_MASK ) == 0 )
+  {
+  }
+  unsigned long rduration = millis() - rstart;
+  if( rduration > 6000 )
+  {
+    // RESET TO DEFAULTS!
+    EEPROM.update(EPROM_ADDR_SETUPFLAG, 255 );
+    flashLED(LED1MASK, 5, 40);
+  }
+  else if( rduration > 2500 )
+  {
+    // TOGGLE ON/OF
+    b_enabled = (b_enabled ? false : true);
+    EEPROM.update(EPROM_ADDR_ACTIVEFLAG, b_enabled ? 1 : 0);
+
+    flashLED(LED2MASK, 3, 50);
+  }
+
+  PORTB &= ~LED1MASK;
+}
+
+/**
+ * Main loop
+ * - Handles RESET
+ * - Handles drive initialization
+ * - Handles SEL0-3 forwarding
  */
 void loop()
 {
-  // Handle RESET
-  if( digitalRead(CIA_RESET) == LOW )
+  // Use a while loop to prevent funtion calls every "loop".
+  while(true)
   {
-    unsigned long rstart = millis();
-    while(digitalRead(CIA_RESET) == LOW)
+    // Handle RESET
+    if( ( PINC & CIA_RESET_MASK ) == 0 )
     {
-      flashLED(LED1MASK, 1);
+      // Reset is triggered
+      HandleReset();
+      b_waitForReady = true;
     }
-    unsigned long rduration = millis() - rstart;
-    if( rduration > 6000 )
+  
+    // Wait for Kickstart / WOM Loader if enabled
+    if( b_enabled && b_waitForReady )
     {
-      //RESET TO DEFAULTS!
-      EEPROM.update(EPROM_ADDR_SETUPFLAG, 255 );
-      flashLED(LED1MASK, 5, 40);
+      waitForReady();
+      b_waitForReady = false;
     }
-    else if( rduration > 2500 )
-    {
-        // TOGGLE ON/OF
-        b_enabled = (b_enabled ? false : true);
-        EEPROM.update(EPROM_ADDR_ACTIVEFLAG, b_enabled ? 1 : 0);
-
-        flashLED(LED2MASK, 3, 50);
-    }
-    b_waitForReady = true;
-  }
-
-  // Wait for Kickstart / WOM Loader if enabled
-  if( b_enabled && b_waitForReady )
-  {
-    b_led1On = true;
-    b_led2On = true;
-    waitForReady();
-    b_led1On = false;
-    b_led2On = false;
-    b_waitForReady = false;
-  }
-
-  // Forward the SEL signals
-  forward(b_enabled);
+  
+    // Forward the SEL signals
+    forward(b_enabled);
+  }  
 }
