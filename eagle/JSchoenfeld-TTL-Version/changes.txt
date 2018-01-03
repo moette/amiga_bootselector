@@ -1,4 +1,9 @@
-03.01.2018 - Marko Oette (marko@oette.info)
+03.01.2018 - Marko Oette (marko@oette.info) - v 0.96
+- Changed config and trigger jumpers to SMD solder jumper on the bottom of the board
+- Added silkscreen markers for BRD on the bottom
+- Reduced board size
+
+03.01.2018 - Marko Oette (marko@oette.info) - v 0.95
 - Added "3x1 Trigger Jumper" for toggling the selector on /SEL0 (Kickstart <2.0) or /SEL3 (Kickstart >= 2.0)
 - Added "2x4 Config Jumper" for configuring wether to switch from /SEL0 to /SEL1 or /SEL0 to /SEL2. The later will be useful on A2000/A3000.
 - Added silkscreen markers to clarify which socket is for the CIA and which one to the Mainboard.
