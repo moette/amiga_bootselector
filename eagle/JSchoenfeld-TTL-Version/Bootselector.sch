@@ -7616,13 +7616,6 @@ Source: AVX .. aphvc.pdf</description>
 <wire x1="114.3" y1="22.86" x2="116.84" y2="25.4" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="PB6" class="0">
-<segment>
-<pinref part="BRD" gate="G$1" pin="PB6"/>
-<wire x1="58.42" y1="33.02" x2="68.58" y2="33.02" width="0.1524" layer="91"/>
-<wire x1="71.12" y1="35.56" x2="68.58" y2="33.02" width="0.1524" layer="91"/>
-</segment>
-</net>
 <net name="PB7" class="0">
 <segment>
 <wire x1="68.58" y1="35.56" x2="71.12" y2="38.1" width="0.1524" layer="91"/>
@@ -8078,6 +8071,11 @@ Source: AVX .. aphvc.pdf</description>
 <wire x1="114.3" y1="33.02" x2="119.38" y2="33.02" width="0.1524" layer="91"/>
 <junction x="114.3" y="33.02"/>
 <pinref part="TRIGGER" gate="G$1" pin="1"/>
+</segment>
+<segment>
+<pinref part="BRD" gate="G$1" pin="PB6"/>
+<wire x1="58.42" y1="33.02" x2="68.58" y2="33.02" width="0.1524" layer="91"/>
+<wire x1="71.12" y1="35.56" x2="68.58" y2="33.02" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
