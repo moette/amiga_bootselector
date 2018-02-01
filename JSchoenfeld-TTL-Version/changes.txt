@@ -1,3 +1,10 @@
+01.02.2018 - Fredric QJ Blåholtz (e5frog) + Marko Oette (marko@oette.info) v. 0.97
+- Updated pcb layout to use only 3 solder jumpers instead of 4
+- Rerouted some traces
+- Rename ENABLE to DISABLE as this is what the Jumper really does.
+
+- Added SMT version for those who dislike THT
+
 03.01.2018 - Marko Oette (marko@oette.info) - v 0.96
 - Changed config and trigger jumpers to SMD solder jumper on the bottom of the board
 - Added silkscreen markers for BRD on the bottom

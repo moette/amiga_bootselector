@@ -1,0 +1,23 @@
+Partlist
+
+Exported from Bootselector.brd at 29.01.2018 18:45
+
+EAGLE Version 8.5.1 Copyright (c) 1988-2017 Autodesk, Inc.
+
+Assembly variant: 
+
+Part     Value          Package      Library  Position (mm)         Orientation
+
+BRD                     DIP40-6      Amiga    (12.43 27.892)        R270
+C1       100nF          C050-025X075 rcl      (11.16 51.99)         R180
+C2       100nF          C050-025X075 rcl      (11.16 27.384)        R180
+CIA                     DIP40-6      Amiga    (9.89 27.892)         R270
+ENABLE                  JP1          jumper   (11.096 2.65)         R90
+IC3      74HC00N        DIL14        74xx-eu  (11.16 16.478)        R270
+IC4      74HC157N       DIL16        74xx-eu  (11.16 39.56)         SR270
+R1       10K            0207/10      rcl      (11.16 5.27)          R180
+SJ1                     SJ           jumper   (11 21)               MR0
+SJ2                     SJ           jumper   (11 19)               MR0
+SJ3                     SJ           jumper   (11 17)               MR0
+SJ4                     SJ           jumper   (11 15)               MR0
+TRIGGER                 SJ_2         jumper   (10.984 9.73)         MR270
