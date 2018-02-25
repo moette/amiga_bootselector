@@ -7447,17 +7447,13 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <label x="-5.08" y="5.08" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="ISP_RST" class="0">
+<net name="/SEL3" class="0">
 <segment>
-<pinref part="ISP" gate="B" pin="5"/>
 <pinref part="MEGA" gate="G$1" pin="PB2(SS/OC1B)"/>
-<wire x1="53.34" y1="27.94" x2="53.34" y2="12.7" width="0.1524" layer="91"/>
-<wire x1="53.34" y1="12.7" x2="38.1" y2="12.7" width="0.1524" layer="91"/>
 <pinref part="BOARD" gate="G$1" pin="16"/>
 <wire x1="38.1" y1="12.7" x2="-25.4" y2="12.7" width="0.1524" layer="91"/>
 <wire x1="63.5" y1="-58.42" x2="38.1" y2="-58.42" width="0.1524" layer="91"/>
 <wire x1="38.1" y1="-58.42" x2="38.1" y2="12.7" width="0.1524" layer="91"/>
-<junction x="38.1" y="12.7"/>
 <label x="-5.08" y="12.7" size="1.778" layer="95"/>
 </segment>
 </net>
@@ -7985,6 +7981,19 @@ Source: http://www.mouser.com/ds/2/392/products_18-2245.pdf</description>
 <segment>
 <pinref part="CIA" gate="G$1" pin="34"/>
 <wire x1="35.56" y1="-35.56" x2="22.86" y2="-35.56" width="0.1524" layer="91"/>
+</segment>
+</net>
+<net name="/ISP_RST" class="0">
+<segment>
+<pinref part="MEGA" gate="G$1" pin="PC6(/RESET)"/>
+<wire x1="-73.66" y1="63.5" x2="-73.66" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="-73.66" y1="71.12" x2="22.86" y2="71.12" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="71.12" x2="22.86" y2="25.4" width="0.1524" layer="91"/>
+<wire x1="22.86" y1="25.4" x2="53.34" y2="25.4" width="0.1524" layer="91"/>
+<pinref part="ISP" gate="B" pin="5"/>
+<wire x1="53.34" y1="25.4" x2="53.34" y2="27.94" width="0.1524" layer="91"/>
+<label x="25.4" y="25.4" size="1.778" layer="95"/>
+<label x="-33.02" y="68.58" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>
