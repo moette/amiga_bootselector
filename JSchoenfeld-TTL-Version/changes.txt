@@ -1,3 +1,9 @@
+25.02.2018 - Fredric QJ Blåholtz (e5frog) + Marko Oette (marko@oette.info) v. 0.98
+- Prototyping v 0.97 done, works
+- Updated SMD version to match THT version
+- Updated documentation for THT version
+- Added mouse enable / disable documentation
+
 01.02.2018 - Fredric QJ Blåholtz (e5frog) + Marko Oette (marko@oette.info) v. 0.97
 - Updated pcb layout to use only 3 solder jumpers instead of 4
 - Rerouted some traces
